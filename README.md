@@ -14,3 +14,5 @@
 * `*_override.tf`, `*_override.tf.json` - исключит все файлы, имя которых оканчивается на _override.tf и _override.tf.json рекурсивно в папке terraform и во всех подпапках
 * `.terraformrc`, `terraform.rc` - исключит все файлы с расширением terraformrc и имя которых оканчивается на terraform.rc рекурсивно в папке terraform и во всех подпапках
 
+## Обновлено 25.02.2022
+
