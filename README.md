@@ -60,7 +60,7 @@ dd01a3507 Update CHANGELOG.md
 ```
 Находим файл и коммит, где появилась функция:
 
-git log -S'globalPluginDirs' --stat --oneline
+`git log -S'globalPluginDirs' --stat --oneline`
 
 По имени файла и функции ищем коммиты с ее изменением:
 
