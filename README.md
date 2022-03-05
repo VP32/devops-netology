@@ -58,8 +58,13 @@ dd01a3507 Update CHANGELOG.md
 66ebff90cdfaa6938f26f908c7ebad8d547fea17 move some more plugin search path logic to command
 8364383c359a6b738a436d1b7745ccdce178df47 Push plugin discovery down into command package
 ```
+Находим файл и коммит, где появилась функция:
 
-`git log --pretty=oneline -L :globalPluginDirs:plugins.go -s`
+git log -S'globalPluginDirs' --stat --oneline
+
+По имени файла и функции ищем коммиты с ее изменением:
+
+`git log --oneline -L :globalPluginDirs:plugins.go -s`
 
 8. Кто автор функции synchronizedWriters?
 
