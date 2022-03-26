@@ -148,8 +148,8 @@ Part  of  the  utsname information is also accessible via /proc/sys/kernel/{osty
     ```
     Есть ли смысл использовать в bash `&&`, если применить `set -e`?
 
-; - разделитель последовательных команд
-&& - логический оператор И
+ - ; - разделитель последовательных команд
+ - && - логический оператор И
 
 В первом случае выполнятся все команды. Во втором - если успешно выполнится проверка, что существует каталог /tmp/some_dir, то выполнится и команда echo Hi
 
@@ -171,8 +171,8 @@ Part  of  the  utsname information is also accessible via /proc/sys/kernel/{osty
 
 Самые частые статусы:
 
-S interruptible sleep (waiting for an event to complete) процессы, ожидающие завершения событий
+- S interruptible sleep (waiting for an event to complete) процессы, ожидающие завершения событий
 
-R running or runnable (on run queue) работающие процессы
+- R running or runnable (on run queue) работающие процессы
 
 Дополнительные символы - это дополнительные характеристики: приоритет, наличие многопоточности, заблокированных страниц в памяти, процесс в фоновой группе и пр.
