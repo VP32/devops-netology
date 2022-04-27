@@ -7,12 +7,15 @@
 ![](img/bitwarden1.png)
 
 Со страницы входа в ВК плагин предлагает использовать сохраненный логин:
+
 ![](img/bitwarden2.png)
 
 2. Установите Google authenticator на мобильный телефон. Настройте вход в Bitwarden акаунт через Google authenticator OTP.
 
 Включил вход через Google authenticator:
 ![](img/bitwarden3.png)
+
+При входе в аккаунт требуется ввести код из аутентификатора:
 ![](img/bitwarden4.png)
 
 Сам аутентификатор не позволяет сделать скриншот на телефоне, когда запущен, прикладываю значок приложения с телефона:
@@ -167,9 +170,134 @@ vladimir@linuxstage:~/learndevops/testssl.sh$ ./testssl.sh -U --sneaky https://w
 
 
 5. Установите на Ubuntu ssh сервер, сгенерируйте новый приватный ключ. Скопируйте свой публичный ключ на другой сервер. Подключитесь к серверу по SSH-ключу.
+
+Не удалось выполнить команду systemctl enable sshd.service, сообщает, что нет такого сервиса, получилось с sudo systemctl enable ssh.
+
+Для подключения использовал свой личный vps-хостинг 37.143.15.232.
+
+```
+vladimir@linuxstage:~/learndevops/devops-netology/vagrant$ sudo apt install openssh-server
+[sudo] пароль для vladimir: 
+Чтение списков пакетов… Готово
+Построение дерева зависимостей       
+Чтение информации о состоянии… Готово
+Следующие пакеты устанавливались автоматически и больше не требуются:
+...
+vladimir@linuxstage:~/learndevops/devops-netology/vagrant$ systemctl start sshd.service
+vladimir@linuxstage:~/learndevops/devops-netology/vagrant$ systemctl enable sshd.serviceFailed to enable unit: Refusing to operate on alias name or linked unit file: sshd.service
+vladimir@linuxstage:~/learndevops/devops-netology/vagrant$ sudo systemctl enable ssh
+Synchronizing state of ssh.service with SysV service script with /lib/systemd/systemd-sysv-install.
+Executing: /lib/systemd/systemd-sysv-install enable ssh
+vladimir@linuxstage:~/learndevops/devops-netology/vagrant$ sudo systemctl status ssh
+● ssh.service - OpenBSD Secure Shell server
+     Loaded: loaded (/lib/systemd/system/ssh.service; enabled; vendor preset: enabled)
+     Active: active (running) since Wed 2022-04-27 16:04:28 MSK; 23min ago
+       Docs: man:sshd(8)
+             man:sshd_config(5)
+   Main PID: 26474 (sshd)
+      Tasks: 1 (limit: 9216)
+     Memory: 1.1M
+     CGroup: /system.slice/ssh.service
+             └─26474 sshd: /usr/sbin/sshd -D [listener] 0 of 10-100 startups
+
+апр 27 16:04:28 linuxstage systemd[1]: Starting OpenBSD Secure Shell server...
+апр 27 16:04:28 linuxstage sshd[26474]: Server listening on 0.0.0.0 port 22.
+апр 27 16:04:28 linuxstage sshd[26474]: Server listening on :: port 22.
+апр 27 16:04:28 linuxstage systemd[1]: Started OpenBSD Secure Shell server.
+vladimir@linuxstage:~/learndevops/devops-netology/vagrant$ ssh-keygen
+Generating public/private rsa key pair.
+Enter file in which to save the key (/home/vladimir/.ssh/id_rsa): 
+Enter passphrase (empty for no passphrase): 
+Enter same passphrase again: 
+Your identification has been saved in /home/vladimir/.ssh/id_rsa
+Your public key has been saved in /home/vladimir/.ssh/id_rsa.pub
+The key fingerprint is:
+SHA256:c2/GidenAKK4z2aXESmtHazoWOdKs06qzd08d/SFqcw vladimir@linuxstage
+The key's randomart image is:
++---[RSA 3072]----+
+|                 |
+|                 |
+|       o .       |
+|      . *        |
+|     . =Soo  o   |
+|    o.+.o+.=oo.  |
+|   +=o.  *.oO.. .|
+| o.=.B= + E+.. o |
+|..+.*==+ .    .  |
++----[SHA256]-----+
+vladimir@linuxstage:~/learndevops/devops-netology/vagrant$ ssh-copy-id www@37.143.15.232
+The authenticity of host '37.143.15.232 (37.143.15.232)' can't be established.
+ECDSA key fingerprint is SHA256:EOzSqW8fWd/kYuMwA6VB6/d+kuZDBPcgfifEptgEmH4.
+Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+/usr/bin/ssh-copy-id: INFO: attempting to log in with the new key(s), to filter out any that are already installed
+/usr/bin/ssh-copy-id: INFO: 2 key(s) remain to be installed -- if you are prompted now it is to install the new keys
+www@37.143.15.232's password: 
+
+Number of key(s) added: 2
+
+Now try logging into the machine, with:   "ssh 'www@37.143.15.232'"
+and check to make sure that only the key(s) you wanted were added.
+
+vladimir@linuxstage:~/learndevops/devops-netology/vagrant$ ssh 'www@37.143.15.232'
+Last login: Wed Apr 27 16:19:47 2022 from 95.73.217.219
+-bash-4.2$
+```
+
+
  
 6. Переименуйте файлы ключей из задания 5. Настройте файл конфигурации SSH клиента, так чтобы вход на удаленный сервер осуществлялся по имени сервера.
 
+Файлы ключей переименовал:
+
+```
+vladimir@linuxstage:~/learndevops/devops-netology/vagrant$ mv ~/.ssh/id_rsa ~/.ssh/private_key
+vladimir@linuxstage:~/learndevops/devops-netology/vagrant$ mv ~/.ssh/id_rsa.pub ~/.ssh/public_key
+vladimir@linuxstage:~/learndevops/devops-netology/vagrant$ ls -la ~/.ssh/
+итого 28
+drwx------  2 vladimir vladimir 4096 апр 27 16:34 .
+drwxr-xr-x 25 vladimir vladimir 4096 апр 24 14:55 ..
+-rw-------  1 vladimir vladimir  411 мар 25 17:14 id_ed25519
+-rw-r--r--  1 vladimir vladimir  103 мар 25 17:14 id_ed25519.pub
+-rw-r--r--  1 vladimir vladimir 1332 апр 27 16:20 known_hosts
+-rw-------  1 vladimir vladimir 2655 апр 27 16:07 private_key
+-rw-r--r--  1 vladimir vladimir  573 апр 27 16:07 public_key
+```
+
+Создал папку и файл для конфига командами, как написано в презентации:
+```
+mkdir -p ~/.ssh && chmod 700 ~/.ssh
+touch ~/.ssh/config && chmod 600 ~/.ssh/config
+```
+Заполнил файл конфига, перезапустил sshd, успешно подключился по имени хоста my_host, как настроено в конфиге:
+
+```
+vladimir@linuxstage:~/.ssh$ nano ~/.ssh/config 
+vladimir@linuxstage:~/.ssh$ sudo systemctl restart sshd
+vladimir@linuxstage:~/.ssh$ cat ~/.ssh/config 
+Host my_host
+  HostName 37.143.15.232
+  IdentityFile ~/.ssh/private_key
+  User www
+
+vladimir@linuxstage:~/.ssh$ ssh my_host
+Last login: Wed Apr 27 17:14:25 2022 from 95.73.217.219
+-bash-4.2$ 
+```
+
 7. Соберите дамп трафика утилитой tcpdump в формате pcap, 100 пакетов. Откройте файл pcap в Wireshark.
+
+Собрал дамп командой:
+
+```
+vladimir@linuxstage:~$ sudo tcpdump -w 100.pcap -c 100 -i wlp0s20f3
+tcpdump: listening on wlp0s20f3, link-type EN10MB (Ethernet), capture size 262144 bytes
+100 packets captured
+278 packets received by filter
+0 packets dropped by kernel
+```
+
+Открыл полученный файл 100.pcap в Wireshark:
+
+![](img/wireshark.png)
 
 
