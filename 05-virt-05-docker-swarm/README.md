@@ -47,6 +47,8 @@ idt16au9acvb7peym8i6ufg9n     node05.netology.yc   Ready     Active             
 5lgpfs47mbi98ydt65l2hz5s5     node06.netology.yc   Ready     Active                          20.10.17
 [centos@node01 ~]$
 ```
+![](img/task2.png)
+
 
 ## Задача 3
 
@@ -74,6 +76,8 @@ wp7uq4mb93fe   swarm_monitoring_node-exporter      global       6/6        stefa
 gj6nqodzozt1   swarm_monitoring_prometheus         replicated   1/1        stefanprodan/swarmprom-prometheus:v2.5.0       
 l7h9z8j43dk9   swarm_monitoring_unsee              replicated   1/1        cloudflare/unsee:v0.8.0                        
 ```
+
+![](img/task3.png)
 
 ## Задача 4 (*)
 
