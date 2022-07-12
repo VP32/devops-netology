@@ -436,7 +436,7 @@ postgres=# \q
 
 
 
-Поднимаем базу из бэкапа в контейнере:
+Восстанавливаем полный бэкап в контейнере:
 
 ```
 postgres@ae58b63dd7de:/$ psql -f /var/lib/postgresql/backup 
