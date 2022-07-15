@@ -1,0 +1,27 @@
+# Use root/example as user/password credentials
+version: '3.1'
+
+networks:
+  mysqlnet:
+    driver: bridge
+
+volumes:
+  database_data: {}
+
+services:
+
+  db:
+    image: mysql:8
+    container_name: mysqlvp32
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+    volumes:
+      - database_data:/var/lib/mysql
+      - ../test_data:/backups
+      - ./cnf:/etc/mysql/conf.d
+    networks:
+      - mysqlnet
