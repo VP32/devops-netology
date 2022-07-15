@@ -91,7 +91,7 @@ Threads: 2  Questions: 1380  Slow queries: 0  Opens: 340  Flush tables: 3  Open 
 ```
 
 Бэкап подмонтирован через вольюм в папку /backups. 
-Бэкап не содержит запроса на создание БД, поэтому создадим ее вручную:
+Бэкап не содержит запроса на создание БД, поэтому создадим ее вручную и восстановим в нее бэкап:
 
 ```
 vladimir@linuxstage:~/learndevops/devops-netology/06-db-03-mysql/mysql$ docker exec -it mysqlvp32 /bin/bash
@@ -287,7 +287,7 @@ mysql> show profiles;
 
 **Решение**
 
-В моем контейнере файл my.cnf находится по пути /etc/my.cnf. Его можно расширить файлом, помещаемым в /etc/mysql/conf.d/:
+В моем контейнере файл my.cnf находится по пути /etc/my.cnf. Его можно расширить файлом, помещаемым в /etc/mysql/conf.d/.:
 
 ```
 bash-4.4# cat /etc/my.cnf
@@ -329,7 +329,7 @@ socket=/var/run/mysqld/mysqld.sock
 !includedir /etc/mysql/conf.d/
 ```
 
-Файл my.cnf с изменениями по заданию:
+Файл my.cnf с изменениями по заданию. Этот файл я подмонтировал через манифест docker-compose:
 ```
 [mysqld]
 
