@@ -51,7 +51,7 @@ EXPOSE 9200
 CMD ["bin/elasticsearch"]
 ```
 
-Использовал следующий конфиг: [elasticsearch.yml](./config/elasticsearch.yml)
+Использовал следующий конфиг: [elasticsearch.yml](./elastic/config/elasticsearch.yml)
 
 Запускал через docker-compose, манифест docker-compose.yml:
 
