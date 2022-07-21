@@ -122,6 +122,7 @@ services:
 
 Создание индексов:
 
+```
 curl --location --request PUT 'localhost:9200/ind-1' \
 --header 'Content-Type: application/json' \
 --data-raw '{
@@ -130,7 +131,9 @@ curl --location --request PUT 'localhost:9200/ind-1' \
         "number_of_shards": 1
     }
 }'
+```
 
+```
 curl --location --request PUT 'localhost:9200/ind-2' \
 --header 'Content-Type: application/json' \
 --data-raw '{
@@ -139,7 +142,9 @@ curl --location --request PUT 'localhost:9200/ind-2' \
         "number_of_shards": 2
     }
 }'
+```
 
+```
 curl --location --request PUT 'localhost:9200/ind-3' \
 --header 'Content-Type: application/json' \
 --data-raw '{
@@ -148,6 +153,7 @@ curl --location --request PUT 'localhost:9200/ind-3' \
         "number_of_shards": 4
     }
 }'
+```
 
 Список индексов:
 
