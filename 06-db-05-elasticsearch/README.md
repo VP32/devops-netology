@@ -195,9 +195,11 @@ yellow open   ind-2            21odU14BSki4v43VZk_Qpg   2   1          0        
 
 Удаление индексов:
 
+```
 curl --location --request DELETE 'localhost:9200/ind-1'
 curl --location --request DELETE 'localhost:9200/ind-2'
 curl --location --request DELETE 'localhost:9200/ind-3'
+```
 
 Индексы удалены:
 
