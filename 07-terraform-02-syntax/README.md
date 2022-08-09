@@ -94,7 +94,7 @@ _Можно использовать утилиту packer для работы �
 
 Ссылка на этот же репозиторий: [https://github.com/VP32/devops-netology/tree/main/terraform](https://github.com/VP32/devops-netology/tree/main/terraform)
 
-Результат выполнения команд terraform init и terraform plan:
+Результат выполнения команд `terraform init` и `terraform plan`:
 
 ```
 vladimir@linuxstage:~/learndevops/devops-netology/terraform$ terraform init
@@ -215,7 +215,7 @@ Plan: 3 to add, 0 to change, 0 to destroy.
 Note: You didn't use the -out option to save this plan, so Terraform can't guarantee to take exactly these actions if you run "terraform apply" now.
 ```
 
-Результат команды:
+Результат команды `terraform apply`:
 
 ```
 vladimir@linuxstage:~/learndevops/devops-netology/terraform$ terraform apply --auto-approve
