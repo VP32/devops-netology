@@ -329,3 +329,4 @@ dmypy.json
 cython_debug/
 
 backend.tf
+!terraform_plan.log
