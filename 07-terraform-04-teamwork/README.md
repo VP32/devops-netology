@@ -70,5 +70,6 @@
 
 Ссылка на конфигурацию:
 
-[main.tf](./terraform/main.tf)
-[versions.tf](./terraform/versions.tf)
+- [main.tf](./task3/terraform/main.tf)
+
+- [versions.tf](./task3/terraform/versions.tf)
