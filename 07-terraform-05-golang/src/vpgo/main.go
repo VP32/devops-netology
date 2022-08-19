@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-const MeterToFootCoeff float64 = 0.3048
+const FootToMeterCoeff float64 = 0.3048
 
 func main() {
 	// 3.1. Напишите программу для перевода метров в футы (1 фут = 0.3048 метр).
@@ -24,7 +24,7 @@ func main() {
 
 // 3.1. Напишите программу для перевода метров в футы (1 фут = 0.3048 метр).
 func MeterToFoot(input float64) float64 {
-	output := input / MeterToFootCoeff
+	output := input / FootToMeterCoeff
 	return output
 }
 

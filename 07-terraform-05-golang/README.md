@@ -64,7 +64,7 @@ import (
 	"fmt"
 )
 
-const MeterToFootCoeff float64 = 0.3048
+const FootToMeterCoeff float64 = 0.3048
 
 func main() {
 	// 3.1. Напишите программу для перевода метров в футы (1 фут = 0.3048 метр).
@@ -84,7 +84,7 @@ func main() {
 
 // 3.1. Напишите программу для перевода метров в футы (1 фут = 0.3048 метр).
 func MeterToFoot(input float64) float64 {
-	output := input / MeterToFootCoeff
+	output := input / FootToMeterCoeff
 	return output
 }
 
@@ -111,7 +111,6 @@ func Div3() []int {
 
 	return result
 }
-
 ```
 
 ## Задача 4. Протестировать код (не обязательно).
@@ -130,10 +129,11 @@ import (
 	"testing"
 )
 
+// Задача 4. Протестировать код (не обязательно).
 // Тест для программы для перевода метров в футы
 func TestMeterToFoot(t *testing.T) {
 	meter := rand.Float64() * 100
-	expected := meter / MeterToFootCoeff
+	expected := meter / FootToMeterCoeff
 	fact := MeterToFoot(meter)
 	if expected != fact {
 		t.Error("Expected ", expected, ", got ", fact)

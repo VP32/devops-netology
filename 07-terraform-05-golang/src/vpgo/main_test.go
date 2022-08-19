@@ -9,7 +9,7 @@ import (
 // Тест для программы для перевода метров в футы
 func TestMeterToFoot(t *testing.T) {
 	meter := rand.Float64() * 100
-	expected := meter / MeterToFootCoeff
+	expected := meter / FootToMeterCoeff
 	fact := MeterToFoot(meter)
 	if expected != fact {
 		t.Error("Expected ", expected, ", got ", fact)
