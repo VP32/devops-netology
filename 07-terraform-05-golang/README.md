@@ -168,5 +168,5 @@ func TestDiv3(t *testing.T) {
 }
 ```
 
-Исходники в этом же репозитории: [src](./src/vpgo)
+Исходники в этом же репозитории: [src/vpgo](./src/vpgo)
 
