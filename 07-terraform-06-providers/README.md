@@ -32,12 +32,3 @@
    * Максимальная длина имени равна 80 символам. Имя может состоять из комбинации  name_prefix и name, к которым в случае, если атрибут fifo_queue = true, может быть добавлен суффикс ".fifo": [Github](https://github.com/hashicorp/terraform-provider-aws/blob/71d1fa399fd77b60db8f64c94e89a8020742cb1b/internal/service/sqs/queue.go#L424)
    * В случае, если атрибут fifo_queue = true, регулярное выражение `^[a-zA-Z0-9_-]{1,75}\.fifo$`. Иначе - `^[a-zA-Z0-9_-]{1,80}$`: [Github](https://github.com/hashicorp/terraform-provider-aws/blob/71d1fa399fd77b60db8f64c94e89a8020742cb1b/internal/service/sqs/queue.go#L424)
     
-## Задача 2. (Не обязательно) 
-В рамках вебинара и презентации мы разобрали как создать свой собственный провайдер на примере кофемашины. 
-Также вот официальная документация о создании провайдера: 
-[https://learn.hashicorp.com/collections/terraform/providers](https://learn.hashicorp.com/collections/terraform/providers).
-
-1. Проделайте все шаги создания провайдера.
-2. В виде результата приложение ссылку на исходный код.
-3. Попробуйте скомпилировать провайдер, если получится то приложите снимок экрана с командой и результатом компиляции.   
-
