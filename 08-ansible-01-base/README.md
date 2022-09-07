@@ -125,9 +125,74 @@ ubuntu                     : ok=3    changed=0    unreachable=0    failed=0    s
 
 Добавил хост под нее в манифест [docker-compose.yml](https://github.com/VP32/learn-ansible1/blob/7ba1e884caae1f3be36aafd63aee7939377b3bf7/docker-compose.yml#L11)
 
+Добавил переменную в [group_vars/fedora/examp.yml](https://github.com/VP32/learn-ansible1/blob/task2/group_vars/fedora/examp.yml)
+
 5. Напишите скрипт на bash: автоматизируйте поднятие необходимых контейнеров, запуск ansible-playbook и остановку контейнеров.
 
 Скрипт написал: https://github.com/VP32/learn-ansible1/blob/task2/run.sh
+
+Результат запуска (вместе с изменениями из пункта 4):
+
+```
+vladimir@vp-learndevops:~/learndevops/learn-ansible1$ ./run.sh 
+Creating network "learn-ansible1_default" with the default driver
+Creating centos7     ... done
+Creating fedora_host ... done
+Creating ubuntu      ... done
+Vault password: 
+
+PLAY [Print os facts] *******************************************************************************
+
+TASK [Gathering Facts] ******************************************************************************
+ok: [localhost]
+ok: [fedora_host]
+ok: [ubuntu]
+ok: [centos7]
+
+TASK [Print OS] *************************************************************************************
+ok: [centos7] => {
+    "msg": "CentOS"
+}
+ok: [ubuntu] => {
+    "msg": "Ubuntu"
+}
+ok: [fedora_host] => {
+    "msg": "Fedora"
+}
+ok: [localhost] => {
+    "msg": "Ubuntu"
+}
+
+TASK [Print fact] ***********************************************************************************
+ok: [centos7] => {
+    "msg": "el default fact"
+}
+ok: [ubuntu] => {
+    "msg": "deb default fact"
+}
+ok: [fedora_host] => {
+    "msg": "fedora fact"
+}
+ok: [localhost] => {
+    "msg": "PaSSw0rd"
+}
+
+PLAY RECAP ******************************************************************************************
+centos7                    : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+fedora_host                : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+localhost                  : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+ubuntu                     : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+Stopping ubuntu      ... done
+Stopping centos7     ... done
+Stopping fedora_host ... done
+Removing ubuntu      ... done
+Removing centos7     ... done
+Removing fedora_host ... done
+Removing network learn-ansible1_default
+
+```
+
 
 7. Все изменения должны быть зафиксированы и отправлены в вашей личный репозиторий.
 
