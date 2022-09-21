@@ -120,6 +120,7 @@ vladimir@vp-learndevops:~/learndevops/ansible-clickhouse$
 
 После выполнения у вас должно получится два сценария molecule и один tox.ini файл в репозитории. Ссылка на репозиторий являются ответами на домашнее задание. Не забудьте указать в ответе теги решений Tox и Molecule заданий.
 
+**Решение**
 
 Ссылка на тег с коммитом по Molecule + Tox: https://github.com/VP32/vector-role/releases/tag/1.2.0
 
