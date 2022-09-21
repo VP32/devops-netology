@@ -14,7 +14,7 @@
 
 **Примечание**
 
-Использовал роль https://github.com/ansible-community/molecule-docker
+Использовал роль https://github.com/AlexeySetevoi/ansible-clickhouse
 
 Командой   `molecule test -s centos8` запустить тесты не удалось, так как не было сценария centos8. Получилось через centos_8:
 
