@@ -24,10 +24,6 @@ resource "yandex_compute_instance" "vp_netology_vm_sonar" {
     nat = true
   }
 
-  /*scheduling_policy {
-    preemptible = true
-  }*/
-
   metadata = {
     ssh-keys = "centos:${file("~/.ssh/id_yc_rsa.pub")}"
   }
@@ -51,10 +47,6 @@ resource "yandex_compute_instance" "vp_netology_vm_nexus" {
     subnet_id = "${yandex_vpc_subnet.subnet-1.id}"
     nat = true
   }
-
-  /*scheduling_policy {
-    preemptible = true
-  }*/
 
   metadata = {
     ssh-keys = "centos:${file("~/.ssh/id_yc_rsa.pub")}"
