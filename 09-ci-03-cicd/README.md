@@ -15,7 +15,7 @@
 
 Поднял машины с помощью плана для Terraform, доступного в папке [terraform](./terraform).
 
-Дописал эти хосты и пользователя centos в файл [/infrastructure/inventory/cicd/hosts.yml](./infrastructure/inventory/cicd/hosts.yml)
+Дописал эти хосты и пользователя centos в файл [infrastructure/inventory/cicd/hosts.yml](./infrastructure/inventory/cicd/hosts.yml)
 
 Добавил свой ключ id_yc_rsa.pub в папку [infrastructure/files](./infrastructure/files), переименовал его в таске в плейбуке.
 
