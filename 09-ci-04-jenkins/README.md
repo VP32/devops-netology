@@ -46,17 +46,27 @@
 
 Это воспроизводилось на разных ролях, не только на моей.
 
-В пунктах 5-7 столкнулся с другой проблемой: там падает плейбук, который используется в скрипте:
+По пунктам 5-7 воспользовался рекомендацией из статьи https://www.shellhacks.com/ansible-sudo-a-password-is-required/: Method #4: Disable Sudo Password for Ansible User
+
+В итоге появилась следующая, новая ошибка: 
 
 ```
-TASK [java : Ensure installation dir exists] ***********************************
-fatal: [localhost]: FAILED! => {"changed": false, "module_stderr": "sudo: a password is required\n", "module_stdout": "", "msg": "MODULE FAILURE\nSee stdout/stderr for the exact error", "rc": 1}
-
-PLAY RECAP *********************************************************************
-localhost                  : ok=2    changed=0    unreachable=0    failed=1    skipped=1    rescued=0    ignored=0   
+TASK [java : Extract java in the installation directory] ***********************
+An exception occurred during task execution. To see the full traceback, use -vvv. The error was: NoneType: None
+fatal: [localhost]: FAILED! => {"changed": false, "msg": "dest '/opt/jdk/openjdk-11' must be an existing dir"}
 ```
 
-В итоге технически все джобы удалось создать и запустить, но ни одна не отработала удачно из-за вышеописанных проблем в плейбуках.:(
+По-видимому, нужно доработать плейбук из задания, чтобы он проверял создание директории /opt/jdk/openjdk-11. После ручного создания этой папки пайплайн отработал:
+
+![](img/j2.png)
+
+Запуск с проставленным чекбоксом prod_run:
+
+![](img/j4.png)
+
+Запуск с не проставленным чекбоксом prod_run:
+
+![](img/j3.png)
 
 
  - Репозиторий с ролью: https://github.com/VP32/vector-role/tree/main
