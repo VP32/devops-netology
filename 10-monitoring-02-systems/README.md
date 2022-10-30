@@ -132,6 +132,22 @@ vladimir@VP32Hard:~/learndevops/monitoring/sandbox$ curl http://localhost:8888 -
 < Date: Sun, 30 Oct 2022 11:13:51 GMT
 < 
 * Connection #0 to host localhost left intact
+vladimir@VP32Hard:~/learndevops/monitoring/sandbox$ curl http://localhost:9092/kapacitor/v1/ping -v
+*   Trying 127.0.0.1:9092...
+* Connected to localhost (127.0.0.1) port 9092 (#0)
+> GET /kapacitor/v1/ping HTTP/1.1
+> Host: localhost:9092
+> User-Agent: curl/7.81.0
+> Accept: */*
+> 
+* Mark bundle as not supporting multiuse
+< HTTP/1.1 204 No Content
+< Content-Type: application/json; charset=utf-8
+< Request-Id: 765b1e34-585b-11ed-826a-0242ac140005
+< X-Kapacitor-Version: 1.6.5
+< Date: Sun, 30 Oct 2022 14:02:16 GMT
+< 
+* Connection #0 to host localhost left intact
 vladimir@VP32Hard:~/learndevops/monitoring/sandbox$ 
 ```
 
