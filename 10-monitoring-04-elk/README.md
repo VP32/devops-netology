@@ -58,14 +58,18 @@ Filebeat следует сконфигурировать для отправки
 
 `Exiting: error loading config file: config file ("filebeat.yml") must be owned by the user identifier (uid=0) or root`
 
-На хост-машине переопределил права к конфигам:
+На хост-машине переопределил права к конфигу filebeat:
 
 ```
-chown root ./configs/*
-chmod go-w ./configs/*
+chown root ./configs/filebeat.yml
+chmod go-w ./configs/filebeat.yml
 ```
 
-В Эластике нет индексов
+Далее потребовался ряд исправлений:
+
+ - Дополнил [docker-compose.yml](./help/configs/docker-compose.yml) по части конфигурации logstash, добавил filebeat в сеть elastic
+ - исправил программу run.py, чтобы логировала в json-формате
+ - исправил конфиг [logstash.conf](./help/configs/logstash.conf) для корректной обработки данных, иначе прокидывались крякозябры и не долетало до Эластика - вместо tcp указал input beats, подправил output по части названия индекса в Эластике.
 
 
 Скриншот `docker ps` через 5 минут после старта всех контейнеров:
@@ -89,12 +93,19 @@ chmod go-w ./configs/*
 Данные логи должны порождать индекс logstash-* в elasticsearch. Если данного индекса нет - воспользуйтесь советами 
 и источниками из раздела "Дополнительные ссылки" данного ДЗ.
  
----
+**Решение:**
 
-### Как оформить ДЗ?
+Индексы из приложения добавились в меню создания  index-patterns:
 
-Выполненное домашнее задание пришлите ссылкой на .md-файл в вашем репозитории.
+![](img/k3.png)
 
----
+Создал несколько индекс-паттернов:
 
- 
+![](img/k4.png)
+
+Логи в Discover:
+
+![](img/k5.png)
+
+
+![](img/k6.png)

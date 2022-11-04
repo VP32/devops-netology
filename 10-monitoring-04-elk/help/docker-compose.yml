@@ -68,9 +68,12 @@ services:
     container_name: logstash
     ports:
       - 5046:5046
+    expose:
+      - 5046
     volumes:
       - ./configs/logstash.conf:/etc/logstash/conf.d/logstash.conf:Z
       - ./configs/logstash.yml:/opt/logstash/config/logstash.yml:Z
+      - ./configs/logstash.conf:/usr/share/logstash/pipeline/logstash.yml:Z
     networks:
       - elastic
     depends_on:
@@ -88,6 +91,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:Z
     depends_on:
       - logstash
+    networks:
+      - elastic
 
   some_application:
     image: library/python:3.9-alpine
