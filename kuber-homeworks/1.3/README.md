@@ -240,7 +240,7 @@ spec:
 
 **Решение:**
 
-1. Добавил init-контейнер busybox с командой `nslookup task2-svc.default.svc.cluster.local`. Экспериментально выяснил, что сервис при именовании его test-2 в неймспейсе default будет иметь dns-имя task2-svc.default.svc.cluster.local.
+1. Добавил init-контейнер busybox с командой `nslookup task2-svc.default.svc.cluster.local`. Экспериментально выяснил, что сервис при именовании его task2-svc в неймспейсе default будет иметь dns-имя task2-svc.default.svc.cluster.local.
 
 Полученный манифест:
 
