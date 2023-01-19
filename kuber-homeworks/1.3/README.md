@@ -48,7 +48,7 @@ spec:
           value: "11443"
 ```
 
-Ошибка состояла в том, что в multitool по умолчанию так же стартовал nginx и пытался занять порт 80, который уже был занят nginx из контейнера nginx.
+Ошибка состояла в том, что в multitool по умолчанию так же стартовал nginx и пытался занять порт 80, который по-видимому уже был занят nginx из контейнера nginx.
 Выяснил это по логам пода:
 
 ![1-1.png](img%2F1-1.png)
@@ -234,9 +234,102 @@ spec:
 ### Задание 2. Создать Deployment и обеспечить старт основного контейнера при выполнении условий
 
 1. Создать Deployment приложения nginx и обеспечить старт контейнера только после того, как будет запущен сервис этого приложения
+
 2. Убедиться, что nginx не стартует. В качестве init-контейнера взять busybox
+
 3. Создать и запустить Service. Убедиться, что nginx запустился
 4. Продемонстрировать состояние пода до и после запуска сервиса
 
+**Решение:**
+
+1. 
+Добавил init-контейнер busybox с командой `nslookup task2-svc.default.svc.cluster.local`. Экспериментально выяснил, что сервис при именовании его test-2 в неймспейсе default будет иметь dns-имя task2-svc.default.svc.cluster.local.
+
+Полученный манифест:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: task2-deployment
+  labels:
+    app: task2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: task2
+  template:
+    metadata:
+      labels:
+        app: task2
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+      initContainers:
+      - name: startup
+        image: busybox
+        command: ['nslookup', 'task2-svc.default.svc.cluster.local']
+
+```
+
+
+
+2. Под не стартует, так как нет ответа от сервиса, так как сервис не создан:
+
+![2-1.png](img%2F2-1.png)
+
+
+3. Добавил сервис в манифест, применил манифест:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: task2-deployment
+  labels:
+    app: task2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: task2
+  template:
+    metadata:
+      labels:
+        app: task2
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+      initContainers:
+      - name: startup
+        image: busybox
+        command: ['nslookup', 'task2-svc.default.svc.cluster.local']
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: task2-svc
+spec:
+  selector:
+    app: task2
+  ports:
+  - name: task2-svc-port
+    port: 80
+    protocol: TCP
+    targetPort: 80
+```    
+
+4. Под стартовал после автоматического рестарта спустя несколько секунд:
+
+![2-2.png](img%2F2-2.png)
+
 ------
+
  

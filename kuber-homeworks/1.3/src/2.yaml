@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: task2-deployment
+  labels:
+    app: task2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: task2
+  template:
+    metadata:
+      labels:
+        app: task2
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+      initContainers:
+      - name: startup
+        image: busybox
+        command: ['nslookup', 'task2-svc.default.svc.cluster.local']
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: task2-svc
+spec:
+  selector:
+    app: task2
+  ports:
+  - name: task2-svc-port
+    port: 80
+    protocol: TCP
+    targetPort: 80
