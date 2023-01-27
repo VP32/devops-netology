@@ -86,7 +86,7 @@ spec:
   selector:
     app: task1-multitool
   ports:
-  - name: task2-multitool-svc-port
+  - name: task1-multitool-svc-port
     port: 80
     targetPort: multitool-port
 
