@@ -116,5 +116,129 @@ Ingress-контроллер ранее включил с помощью ком�
 
 ![2-1.png](img%2F2-1.png)
 
+Итоговый манифест. Дополнительно, чтобы заработал редирект на сервис backend-svc по пути /api, добавил в манифест ignress следующую аннотацию:
+
+```
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+```
+Иначе редирект куда бы то ни было, по пути, отличному от /, не работал.
+
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  labels:
+    app: task1-nginx
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: task1-nginx
+  template:
+    metadata:
+      labels:
+        app: task1-nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+          name: nginx-port
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-svc
+spec:
+  selector:
+    app: task1-nginx
+  ports:
+  - name: task1-nginx-svc-port
+    port: 80
+    targetPort: nginx-port
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  labels:
+    app: task1-multitool
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: task1-multitool
+  template:
+    metadata:
+      labels:
+        app: task1-multitool
+    spec:
+      containers:
+      - name: multitool
+        image: wbitt/network-multitool
+        ports:
+        - containerPort: 8080
+          name: multitool-port
+        env:
+        - name: HTTP_PORT
+          value: "8080"
+        - name: HTTPS_PORT
+          value: "11443"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-svc
+spec:
+  selector:
+    app: task1-multitool
+  ports:
+  - name: task1-multitool-svc-port
+    port: 80
+    targetPort: multitool-port
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: task2-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend-svc
+            port:
+              number: 80
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-svc
+            port:
+              number: 80
+
+```
+
+Применил манифест, все поднялось и заработало:
+
+![2-2.png](img%2F2-2.png)
+
+Проверил ingress отдельно:
+
+![2-3.png](img%2F2-3.png)
+
+Проверил с помощью команды curl доступность frontend, backend по ip-адресу ноды:
+
+![2-4.png](img%2F2-4.png)
+
 ------
 
