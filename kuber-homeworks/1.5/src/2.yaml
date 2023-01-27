@@ -77,19 +77,20 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: task2-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   rules:
-  - host:
-    http:
+  - http:
       paths:
       - path: /
-        pathType: Exact
+        pathType: Prefix
         backend:
           service:
             name: frontend-svc
             port:
               number: 80
-      - path: /api
+      - path: "/api"
         pathType: Prefix
         backend:
           service:
