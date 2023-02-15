@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: task1-deployment
+  labels:
+    app: task1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: task1
+  template:
+    metadata:
+      labels:
+        app: task1
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: index-page-volume
+          mountPath: /usr/share/nginx/html
+      - name: multitool
+        image: wbitt/network-multitool
+        ports:
+        - containerPort: 8080
+        env:
+        - name: HTTP_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: task1-configmap
+              key: http-port
+        - name: HTTPS_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: task1-configmap
+              key: https-port
+      volumes:
+      - name: index-page-volume
+        configMap:
+          name: index-page-configmap
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: task1-svc
+spec:
+  selector:
+    app: task1
+  ports:
+  - name: task1-nginx-svc-port
+    port: 80
+    targetPort: 80
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: task1-configmap
+data:
+  http-port: "8080"
+  https-port: "11443"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: index-page-configmap
+data:
+  index.html: |
+    <html>
+    <head>
+    <title>Hello Netology Page</title>
+    </head>
+    <body>
+    <h1>Hello Netology Page</h1>
+    <p>This is <b>Task 1</b></p>
+    </body>
+    </html>
