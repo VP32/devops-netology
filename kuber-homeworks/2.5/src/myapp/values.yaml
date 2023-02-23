@@ -1,0 +1,5 @@
+nginx_image:
+  tag: "latest"
+
+multitool_image:
+  tag: "latest"
