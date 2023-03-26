@@ -8,6 +8,8 @@ function delete_vm {
 }
 
 delete_vm "master1"
+delete_vm "master2"
+delete_vm "master3"
 delete_vm "node1"
 delete_vm "node2"
 delete_vm "node3"

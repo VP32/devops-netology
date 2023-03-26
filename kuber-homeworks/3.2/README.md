@@ -37,7 +37,7 @@ v4_cidr_blocks:
   - 192.168.0.0/24
 ```
 
-Затем с помощью скрипта из репозитория aak74/kubernetes-for-beginners создал 1 мастер-ноду и 4 воркер-ноды в ранее созданной подсети:
+Затем с помощью скрипта из репозитория **aak74/kubernetes-for-beginners** создал 1 мастер-ноду и 4 воркер-ноды в ранее созданной подсети:
 
 ```bash
 #!/bin/bash
@@ -113,7 +113,7 @@ DEBUG: adding host node4 to group kube_node
 DEBUG: adding host node5 to group kube_node
 ```
 
-Корректирую инвентори. Прописываю внутренние адреса в переменных ip, access_ip, прописываю пользователя в ansible_user: yc-user.
+Корректирую инвентори. Прописываю внутренние адреса в переменных ip, access_ip (без этого исправления не накатывался плейбук), прописываю пользователя в ansible_user: yc-user.
 
 Итоговый файл hosts.yaml:
 
@@ -264,10 +264,6 @@ vladimir@vp32hard:~/learndevops/kubespray$
 
 ![1.png](img%2F1.png)
 
-## Дополнительные задания (со звездочкой*)
-
-**Настоятельно рекомендуем выполнять все задания под звёздочкой.**   Их выполнение поможет глубже разобраться в материале.   
-Задания под звёздочкой дополнительные (необязательные к выполнению) и никак не повлияют на получение вами зачета по этому домашнему заданию. 
 
 ------
 ### Задание 2*. Установить HA кластер
@@ -276,8 +272,273 @@ vladimir@vp32hard:~/learndevops/kubespray$
 2. Использовать нечетное кол-во Master-node
 3. Для cluster ip использовать keepalived или другой способ
 
-### Правила приема работы
+### Решение
 
-1. Домашняя работа оформляется в своем Git репозитории в файле README.md. Выполненное домашнее задание пришлите ссылкой на .md-файл в вашем репозитории.
-2. Файл README.md должен содержать скриншоты вывода необходимых команд `kubectl get nodes`, а также скриншоты результатов
-3. Репозиторий должен содержать тексты манифестов или ссылки на них в файле README.md
+Создал 3 мастер-ноды, 4 воркер-ноды.
+
+Скрипт на создание ВМ:
+
+```bash
+#!/bin/bash
+
+set -e
+
+function create_vm {
+  local NAME=$1
+
+  YC=$(cat <<END
+    yc compute instance create \
+      --name $NAME \
+      --hostname $NAME \
+      --zone ru-central1-c \
+      --network-interface subnet-name=k8s-subnet-1,nat-ip-version=ipv4 \
+      --memory 2 \
+      --cores 2 \
+      --create-boot-disk image-folder-id=standard-images,image-family=ubuntu-2004-lts,type=network-ssd,size=20 \
+      --ssh-key /home/vladimir/.ssh/id_yc_rsa.pub
+END
+)
+#  echo "$YC"
+  eval "$YC"
+}
+
+create_vm "master1"
+create_vm "master2"
+create_vm "master3"
+create_vm "node1"
+create_vm "node2"
+create_vm "node3"
+create_vm "node4"
+```
+
+Создались следующие ВМ:
+
+```
+vladimir@vp32hard:~/learndevops/devops-netology/kuber-homeworks/3.2/src/task2$ yc compute instance list
++----------------------+---------+---------------+---------+----------------+--------------+
+|          ID          |  NAME   |    ZONE ID    | STATUS  |  EXTERNAL IP   | INTERNAL IP  |
++----------------------+---------+---------------+---------+----------------+--------------+
+| ef310aeuuctbns72m9lq | node4   | ru-central1-c | RUNNING | 84.201.181.120 | 192.168.0.25 |
+| ef34gkqqdther0ebhlht | master1 | ru-central1-c | RUNNING | 84.201.170.180 | 192.168.0.11 |
+| ef38br13e5jvbu8dd27t | node1   | ru-central1-c | RUNNING | 84.201.180.215 | 192.168.0.22 |
+| ef3j65oj8klu1q8jb95l | node3   | ru-central1-c | RUNNING | 84.201.181.162 | 192.168.0.6  |
+| ef3k8hathqa9mfskvnu3 | master3 | ru-central1-c | RUNNING | 84.201.181.17  | 192.168.0.33 |
+| ef3l8d2f3738010mk16m | master2 | ru-central1-c | RUNNING | 84.201.169.232 | 192.168.0.17 |
+| ef3u81h65oiinfpfpeca | node2   | ru-central1-c | RUNNING | 84.201.181.183 | 192.168.0.21 |
++----------------------+---------+---------------+---------+----------------+--------------+
+```
+
+
+Попробовал сначала сделать, как описано в ссылке из лекции: https://github.com/BigKAA/youtube/blob/master/kubeadm/ha_cluster.md
+
+Но уперся в то, что по команде `ip n l` у меня не видно кластерного ip-aдреса. И как будто keepalived видит только машину, на которой он запущен и тут же становится мастером на ней. Манипуляции с настройками iptables не помогли. Также мне пока непонятно, как транслировать наружу из Яндекс-облака выбранный мной кластерный адрес из внутренней подсети с нодами.
+
+Поэтому попробовал сделать иначе. Создал сетевой балансировщик Яндекс Облака, указал ему в качестве целевой группы мои 3 мастер-ноды. В качестве обработчика сделал проброс с порта 7443 внешнего ip-адреса балансировщика на порт 6443 в подсети кластера. 
+
+Вот так я это сделал:
+
+Создаем сетевой балансировщик:
+
+Создаем целевую группу, вносим в нее все наши мастер-ноды:
+
+```
+vladimir@vp32hard:~/learndevops/devops-netology/kuber-homeworks/3.2/src/task2$ yc load-balancer target-group create \
+--region-id ru-central1 \
+--name k8s-tg \
+--target subnet-id=b0c78ho3jfrl4vj5ibbc,address=192.168.0.11 \
+--target subnet-id=b0c78ho3jfrl4vj5ibbc,address=192.168.0.17 \
+--target subnet-id=b0c78ho3jfrl4vj5ibbc,address=192.168.0.33
+done (1s)
+id: enp5otptieosupmnd1nv
+folder_id: b1g93e8c1rj5ohc6pk80
+created_at: "2023-03-26T15:10:41Z"
+name: k8s-tg
+region_id: ru-central1
+targets:
+  - subnet_id: b0c78ho3jfrl4vj5ibbc
+    address: 192.168.0.11
+  - subnet_id: b0c78ho3jfrl4vj5ibbc
+    address: 192.168.0.17
+  - subnet_id: b0c78ho3jfrl4vj5ibbc
+    address: 192.168.0.33
+```
+
+
+Создаем балансировщик с целевой группой и обработчиком:
+
+```
+vladimir@vp32hard:~/learndevops/devops-netology/kuber-homeworks/3.2/src/task2$ yc load-balancer network-load-balancer create \
+  --region-id ru-central1 \
+  --name k8s-balancer \
+  --listener name=ks8-listener,external-ip-version=ipv4,port=7443,target-port=6443,protocol=tcp \
+  --target-group target-group-id=enp5otptieosupmnd1nv,healthcheck-name=k8s-health,healthcheck-interval=2s,healthcheck-timeout=1s,healthcheck-unhealthythreshold=2,healthcheck-healthythreshold=2,healthcheck-tcp-port=6443
+done (2s)
+id: enp1tcg6kjk9uq3ml609
+folder_id: b1g93e8c1rj5ohc6pk80
+created_at: "2023-03-26T15:23:58Z"
+name: k8s-balancer
+region_id: ru-central1
+status: ACTIVE
+type: EXTERNAL
+listeners:
+  - name: ks8-listener
+    address: 51.250.43.243
+    port: "7443"
+    protocol: TCP
+    target_port: "6443"
+    ip_version: IPV4
+attached_target_groups:
+  - target_group_id: enp5otptieosupmnd1nv
+    health_checks:
+      - name: k8s-health
+        interval: 2s
+        timeout: 1s
+        unhealthy_threshold: "2"
+        healthy_threshold: "2"
+        tcp_options:
+          port: "6443"
+```
+  
+Добавим полученный ip-адрес обработчика в конфиг `inventory/mycluster/group_vars/k8s_cluster/k8s-cluster.yml` в параметр supplementary_addresses_in_ssl_keys.
+
+Запустим плейбук:
+
+```
+vladimir@vp32hard:~/learndevops/kubespray$ ansible-playbook -i inventory/mycluster/hosts.yaml cluster.yml -b -v 
+...
+```
+
+По какой-то причине плейбук полностью успешно отработал только со второго запуска, при первом были ошибки с сертификатами для master2, master3. Запустил повторно, отработал без ошибок и ноды видны балансировщиком в статусе Healthy.
+
+После успешного применения плейбука внесем в локальный конфиг сведения о кластере. В качестве адреса сервера указываем ip-адрес балансировщика 51.250.43.243 и порт балансировщика 7443.
+После чего команда kubectl get nodes успешно отрабатывает с локальной машины:
+
+```
+vladimir@vp32hard:~/learndevops/kubespray$ cat ~/.kube/config 
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority-data: LS0...==
+    server: https://192.168.1.68:16443
+  name: microk8s-cluster
+- cluster:
+    certificate-authority-data: LS0...==
+    server: https://51.250.43.243:7443
+  name: yc-k8s-cluster
+contexts:
+- context:
+    cluster: microk8s-cluster
+    user: admin
+  name: microk8s
+- context:
+    cluster: yc-k8s-cluster
+    user: yc-k8s-admin
+  name: yc-k8s
+current-context: yc-k8s
+kind: Config
+preferences: {}
+users:
+- name: admin
+  user:
+    token: VnNVMHM2bjBIczB6dlYrTDd3c2ZXTDd5c0FJM3kzaDNxaHRJYURiMzY1VT0K
+- name: yc-k8s-admin
+  user:
+    client-certificate-data: LS0t...==
+    client-key-data: LS0...=
+
+```
+
+
+```
+vladimir@vp32hard:~/learndevops/kubespray$ kubectl get nodes
+NAME      STATUS   ROLES           AGE     VERSION
+master1   Ready    control-plane   20m     v1.26.3
+master2   Ready    control-plane   9m33s   v1.26.3
+master3   Ready    control-plane   9m7s    v1.26.3
+node1     Ready    <none>          7m41s   v1.26.3
+node2     Ready    <none>          7m40s   v1.26.3
+node3     Ready    <none>          7m40s   v1.26.3
+node4     Ready    <none>          7m41s   v1.26.3
+vladimir@vp32hard:~/learndevops/kubespray$ kubectl get nodes -o wide
+NAME      STATUS   ROLES           AGE     VERSION   INTERNAL-IP    EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION      CONTAINER-RUNTIME
+master1   Ready    control-plane   20m     v1.26.3   192.168.0.11   <none>        Ubuntu 20.04.5 LTS   5.4.0-137-generic   containerd://1.7.0
+master2   Ready    control-plane   9m39s   v1.26.3   192.168.0.17   <none>        Ubuntu 20.04.5 LTS   5.4.0-137-generic   containerd://1.7.0
+master3   Ready    control-plane   9m13s   v1.26.3   192.168.0.33   <none>        Ubuntu 20.04.5 LTS   5.4.0-137-generic   containerd://1.7.0
+node1     Ready    <none>          7m47s   v1.26.3   192.168.0.22   <none>        Ubuntu 20.04.5 LTS   5.4.0-137-generic   containerd://1.7.0
+node2     Ready    <none>          7m46s   v1.26.3   192.168.0.21   <none>        Ubuntu 20.04.5 LTS   5.4.0-137-generic   containerd://1.7.0
+node3     Ready    <none>          7m46s   v1.26.3   192.168.0.6    <none>        Ubuntu 20.04.5 LTS   5.4.0-137-generic   containerd://1.7.0
+node4     Ready    <none>          7m47s   v1.26.3   192.168.0.25   <none>        Ubuntu 20.04.5 LTS   5.4.0-137-generic   containerd://1.7.0
+vladimir@vp32hard:~/learndevops/kubespray$ 
+```
+
+Проверим работу при условии отключении одной мастер-ноды.
+
+
+Гасим первую мастер-ноду. Кластер отзывается, нода master1 не готова:
+
+```
+vladimir@vp32hard:~/learndevops/kubespray$ kubectl get nodes -o wide
+NAME      STATUS     ROLES           AGE   VERSION   INTERNAL-IP    EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION      CONTAINER-RUNTIME
+master1   NotReady   control-plane   32m   v1.26.3   192.168.0.11   <none>        Ubuntu 20.04.5 LTS   5.4.0-137-generic   containerd://1.7.0
+master2   Ready      control-plane   21m   v1.26.3   192.168.0.17   <none>        Ubuntu 20.04.5 LTS   5.4.0-137-generic   containerd://1.7.0
+master3   Ready      control-plane   21m   v1.26.3   192.168.0.33   <none>        Ubuntu 20.04.5 LTS   5.4.0-137-generic   containerd://1.7.0
+node1     Ready      <none>          19m   v1.26.3   192.168.0.22   <none>        Ubuntu 20.04.5 LTS   5.4.0-137-generic   containerd://1.7.0
+node2     Ready      <none>          19m   v1.26.3   192.168.0.21   <none>        Ubuntu 20.04.5 LTS   5.4.0-137-generic   containerd://1.7.0
+node3     Ready      <none>          19m   v1.26.3   192.168.0.6    <none>        Ubuntu 20.04.5 LTS   5.4.0-137-generic   containerd://1.7.0
+node4     Ready      <none>          19m   v1.26.3   192.168.0.25   <none>        Ubuntu 20.04.5 LTS   5.4.0-137-generic   containerd://1.7.0
+vladimir@vp32hard:~/learndevops/kubespray$ 
+```
+
+Включаем первую мастер-ноду. Кластер отзывается, нода через некоторое время возвращается в статус Ready:
+
+```
+vladimir@vp32hard:~/learndevops/kubespray$ kubectl get nodes -o wide
+NAME      STATUS   ROLES           AGE   VERSION   INTERNAL-IP    EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION      CONTAINER-RUNTIME
+master1   Ready    control-plane   35m   v1.26.3   192.168.0.11   <none>        Ubuntu 20.04.5 LTS   5.4.0-137-generic   containerd://1.7.0
+master2   Ready    control-plane   24m   v1.26.3   192.168.0.17   <none>        Ubuntu 20.04.5 LTS   5.4.0-137-generic   containerd://1.7.0
+master3   Ready    control-plane   24m   v1.26.3   192.168.0.33   <none>        Ubuntu 20.04.5 LTS   5.4.0-137-generic   containerd://1.7.0
+node1     Ready    <none>          22m   v1.26.3   192.168.0.22   <none>        Ubuntu 20.04.5 LTS   5.4.0-137-generic   containerd://1.7.0
+node2     Ready    <none>          22m   v1.26.3   192.168.0.21   <none>        Ubuntu 20.04.5 LTS   5.4.0-137-generic   containerd://1.7.0
+node3     Ready    <none>          22m   v1.26.3   192.168.0.6    <none>        Ubuntu 20.04.5 LTS   5.4.0-137-generic   containerd://1.7.0
+node4     Ready    <none>          22m   v1.26.3   192.168.0.25   <none>        Ubuntu 20.04.5 LTS   5.4.0-137-generic   containerd://1.7.0
+```
+
+
+Выключаем третью мастер-ноду. Кластер отзывается, нода master3 не готова:
+
+```
+vladimir@vp32hard:~/learndevops/kubespray$ kubectl get nodes -o wide
+NAME      STATUS     ROLES           AGE   VERSION   INTERNAL-IP    EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION      CONTAINER-RUNTIME
+master1   Ready      control-plane   38m   v1.26.3   192.168.0.11   <none>        Ubuntu 20.04.5 LTS   5.4.0-137-generic   containerd://1.7.0
+master2   Ready      control-plane   27m   v1.26.3   192.168.0.17   <none>        Ubuntu 20.04.5 LTS   5.4.0-137-generic   containerd://1.7.0
+master3   NotReady   control-plane   27m   v1.26.3   192.168.0.33   <none>        Ubuntu 20.04.5 LTS   5.4.0-137-generic   containerd://1.7.0
+node1     Ready      <none>          25m   v1.26.3   192.168.0.22   <none>        Ubuntu 20.04.5 LTS   5.4.0-137-generic   containerd://1.7.0
+node2     Ready      <none>          25m   v1.26.3   192.168.0.21   <none>        Ubuntu 20.04.5 LTS   5.4.0-137-generic   containerd://1.7.0
+node3     Ready      <none>          25m   v1.26.3   192.168.0.6    <none>        Ubuntu 20.04.5 LTS   5.4.0-137-generic   containerd://1.7.0
+node4     Ready      <none>          25m   v1.26.3   192.168.0.25   <none>        Ubuntu 20.04.5 LTS   5.4.0-137-generic   containerd://1.7.0
+```
+
+
+Включаем третью мастер-ноду. Кластер отзывается, нода master3 через некоторое время возвращается в статус Ready:
+
+```
+vladimir@vp32hard:~/learndevops/kubespray$ kubectl get nodes -o wide
+NAME      STATUS     ROLES           AGE   VERSION   INTERNAL-IP    EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION      CONTAINER-RUNTIME
+master1   Ready      control-plane   41m   v1.26.3   192.168.0.11   <none>        Ubuntu 20.04.5 LTS   5.4.0-137-generic   containerd://1.7.0
+master2   Ready      control-plane   30m   v1.26.3   192.168.0.17   <none>        Ubuntu 20.04.5 LTS   5.4.0-137-generic   containerd://1.7.0
+master3   NotReady   control-plane   30m   v1.26.3   192.168.0.33   <none>        Ubuntu 20.04.5 LTS   5.4.0-137-generic   containerd://1.7.0
+node1     Ready      <none>          28m   v1.26.3   192.168.0.22   <none>        Ubuntu 20.04.5 LTS   5.4.0-137-generic   containerd://1.7.0
+node2     Ready      <none>          28m   v1.26.3   192.168.0.21   <none>        Ubuntu 20.04.5 LTS   5.4.0-137-generic   containerd://1.7.0
+node3     Ready      <none>          28m   v1.26.3   192.168.0.6    <none>        Ubuntu 20.04.5 LTS   5.4.0-137-generic   containerd://1.7.0
+node4     Ready      <none>          28m   v1.26.3   192.168.0.25   <none>        Ubuntu 20.04.5 LTS   5.4.0-137-generic   containerd://1.7.0
+vladimir@vp32hard:~/learndevops/kubespray$ kubectl get nodes -o wide
+NAME      STATUS   ROLES           AGE   VERSION   INTERNAL-IP    EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION      CONTAINER-RUNTIME
+master1   Ready    control-plane   42m   v1.26.3   192.168.0.11   <none>        Ubuntu 20.04.5 LTS   5.4.0-137-generic   containerd://1.7.0
+master2   Ready    control-plane   31m   v1.26.3   192.168.0.17   <none>        Ubuntu 20.04.5 LTS   5.4.0-137-generic   containerd://1.7.0
+master3   Ready    control-plane   31m   v1.26.3   192.168.0.33   <none>        Ubuntu 20.04.5 LTS   5.4.0-137-generic   containerd://1.7.0
+node1     Ready    <none>          29m   v1.26.3   192.168.0.22   <none>        Ubuntu 20.04.5 LTS   5.4.0-137-generic   containerd://1.7.0
+node2     Ready    <none>          29m   v1.26.3   192.168.0.21   <none>        Ubuntu 20.04.5 LTS   5.4.0-137-generic   containerd://1.7.0
+node3     Ready    <none>          29m   v1.26.3   192.168.0.6    <none>        Ubuntu 20.04.5 LTS   5.4.0-137-generic   containerd://1.7.0
+node4     Ready    <none>          29m   v1.26.3   192.168.0.25   <none>        Ubuntu 20.04.5 LTS   5.4.0-137-generic   containerd://1.7.0
+vladimir@vp32hard:~/learndevops/kubespray$ 
+```
