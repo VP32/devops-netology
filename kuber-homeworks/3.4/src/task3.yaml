@@ -1,0 +1,143 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-blue
+  labels:
+    app: nginx-blue
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: nginx-blue
+  template:
+    metadata:
+      labels:
+        app: nginx-blue
+    spec:
+      containers:
+      - name: nginx
+        image: nginx
+        volumeMounts:
+        - name: index-page-volume
+          mountPath: /usr/share/nginx/html
+      volumes:
+      - name: index-page-volume
+        configMap:
+          name: index-page-blue-configmap
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: index-page-blue-configmap
+data:
+  index.html: |
+    <html>
+    <head>
+    <title>Version Blue</title>
+    <style>
+    body{
+    background-color: rgb(153, 204, 255);
+    }
+    </style>
+    </head>
+    <body>
+    <h1>Version Blue page</h1>
+    </body>
+    </html>
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-blue-svc
+spec:
+  selector:
+    app: nginx-blue
+  ports:
+  - port: 80
+    targetPort: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: blue-ingress
+  annotations:
+spec:
+  defaultBackend:
+    service:
+      name: nginx-blue-svc
+      port:
+        number: 80
+---
+# canary green version
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-green
+  labels:
+    app: nginx-green
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: nginx-green
+  template:
+    metadata:
+      labels:
+        app: nginx-green
+    spec:
+      containers:
+      - name: nginx
+        image: nginx
+        volumeMounts:
+        - name: index-page-volume
+          mountPath: /usr/share/nginx/html
+      volumes:
+      - name: index-page-volume
+        configMap:
+          name: index-page-green-configmap
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: index-page-green-configmap
+data:
+  index.html: |
+    <html>
+    <head>
+    <title>Version Green</title>
+    <style>
+    body{
+    background-color: rgb(153, 255, 204);
+    }
+    </style>
+    </head>
+    <body>
+    <h1>Version Green page</h1>
+    </body>
+    </html>
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-green-svc
+spec:
+  selector:
+    app: nginx-green
+  ports:
+  - port: 8080
+    targetPort: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: green-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/canary: "true"
+    nginx.ingress.kubernetes.io/canary-by-header: "User-Agent"
+    nginx.ingress.kubernetes.io/canary-by-header-pattern: "Chrome"
+spec:
+  defaultBackend:
+    service:
+      name: nginx-green-svc
+      port:
+        number: 80
