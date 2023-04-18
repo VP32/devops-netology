@@ -25,7 +25,7 @@ Resource Terraform для Yandex Cloud:
 
 ### Решение
 
-Полученный код для Terraform находится в подпапке [.src/terraform](.src/terraform)
+Полученный код для Terraform находится в подпапке [src/terraform](./src/terraform)
 
 Основной план в файле main.tf:
 
