@@ -99,7 +99,7 @@ resource "yandex_vpc_network" "network-netology" {
   name = "network-netology"
 }
 
-# Публичная подсеть и ее ресурсы
+# Публичная подсеть
 resource "yandex_vpc_subnet" "public" {
   name           = "public"
   v4_cidr_blocks = ["192.168.10.0/24"]
@@ -431,4 +431,4 @@ output "alb-address" {
 
 Через некоторое время ВМ пересоздаются автоматически, теперь вместо удаленных добавились 192.16.10.34 и 192.16.10.28 :
 
-![12.png](img%2F12.png)
+![12.png](img%2F13.png)

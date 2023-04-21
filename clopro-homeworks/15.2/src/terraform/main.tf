@@ -60,7 +60,7 @@ resource "yandex_vpc_network" "network-netology" {
   name = "network-netology"
 }
 
-# Публичная подсеть и ее ресурсы
+# Публичная подсеть
 resource "yandex_vpc_subnet" "public" {
   name           = "public"
   v4_cidr_blocks = ["192.168.10.0/24"]
