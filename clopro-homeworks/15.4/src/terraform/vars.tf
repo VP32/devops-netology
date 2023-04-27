@@ -9,3 +9,11 @@ variable "yc_cloud_id" {
 variable "yc_folder_id" {
   default = "b1gt21qoc3d3qn03flcv"
 }
+
+variable "kuber-sa-name" {
+  default = "kuber-sa"
+}
+
+variable "k8s_version" {
+  default = "1.23"
+}

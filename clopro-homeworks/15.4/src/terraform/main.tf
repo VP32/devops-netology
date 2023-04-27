@@ -108,20 +108,20 @@ resource "yandex_vpc_security_group" "cluster-sg-1" {
     port           = 3306
   }
 
-  egress {
-    protocol       = "TCP"
-    description    = "Исходящий траффик кластера"
-    v4_cidr_blocks = ["192.168.10.0/24", "192.168.20.0/24", "192.168.30.0/24"]
-    from_port      = 3306
-    to_port        = 3306
-  }
+#  egress {
+#    protocol       = "TCP"
+#    description    = "Исходящий траффик кластера"
+#    v4_cidr_blocks = ["192.168.10.0/24", "192.168.20.0/24", "192.168.30.0/24"]
+#    from_port      = 3306
+#    to_port        = 3306
+#  }
 }
 
 
 ###################################################################################################################
 output "connection_current_master" {
   # TODO
-  value = "с-${yandex_mdb_mysql_cluster.vp-mysql-01.id}.rw.mdb.yandexcloud.net"
+  value = "c-${yandex_mdb_mysql_cluster.vp-mysql-01.id}.rw.mdb.yandexcloud.net"
 }
 output "connection_nodes" {
   # TODO
