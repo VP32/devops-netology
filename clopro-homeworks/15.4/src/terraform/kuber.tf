@@ -1,10 +1,10 @@
 resource "yandex_kubernetes_cluster" "k8s-regional" {
-  name = "vp-k8s-cluster-01"
-  network_id = yandex_vpc_network.network-netology.id
+  name               = "vp-k8s-cluster-01"
+  network_id         = yandex_vpc_network.network-netology.id
   cluster_ipv4_range = "10.1.0.0/16"
   service_ipv4_range = "10.2.0.0/16"
   master {
-    version = var.k8s_version
+    version   = var.k8s_version
     public_ip = true
     regional {
       region = "ru-central1"
@@ -21,11 +21,12 @@ resource "yandex_kubernetes_cluster" "k8s-regional" {
         subnet_id = yandex_vpc_subnet.public-c.id
       }
     }
-    security_group_ids = [yandex_vpc_security_group.k8s-main-sg.id]
+    # TODO Удалить или дополнить SG, чтобы работала связь с кластером
+    #security_group_ids = [yandex_vpc_security_group.k8s-main-sg.id]
   }
   service_account_id      = yandex_iam_service_account.kuber-sa-account.id
   node_service_account_id = yandex_iam_service_account.kuber-sa-account.id
-  depends_on = [
+  depends_on              = [
     yandex_resourcemanager_folder_iam_member.k8s-clusters-agent,
     yandex_resourcemanager_folder_iam_member.vpc-public-admin,
     yandex_resourcemanager_folder_iam_member.images-puller
@@ -33,6 +34,39 @@ resource "yandex_kubernetes_cluster" "k8s-regional" {
   kms_provider {
     key_id = yandex_kms_symmetric_key.kms-key.id
   }
+}
+
+resource "yandex_kubernetes_node_group" "k8s-ng-01" {
+  cluster_id = yandex_kubernetes_cluster.k8s-regional.id
+  name       = "k8s-ng-01"
+  instance_template {
+    #name        = "k8s-node-"
+    platform_id = "standard-v2"
+    container_runtime {
+      type = "containerd"
+    }
+    network_interface {
+      nat                = true
+      subnet_ids         = ["${yandex_vpc_subnet.public-a.id}"]
+    }
+    scheduling_policy {
+      preemptible = true
+    }
+  }
+
+  scale_policy {
+    auto_scale {
+      initial = 3
+      max     = 6
+      min     = 3
+    }
+  }
+  allocation_policy {
+    location {
+      zone = "ru-central1-a"
+    }
+  }
+
 }
 #######################################################################################################################
 # Output data
@@ -48,6 +82,7 @@ output "ks8_cluster_ca_certificate" {
 
 
 #######################################################################################################################
+# TODO Удалить или дополнить SG, чтобы работала связь с кластером
 # Security Group
 resource "yandex_vpc_security_group" "k8s-main-sg" {
   name        = "k8s-main-sg"
@@ -68,30 +103,30 @@ resource "yandex_vpc_security_group" "k8s-main-sg" {
     to_port           = 65535
   }
   ingress {
-    protocol          = "ANY"
-    description       = "Правило разрешает взаимодействие под-под и сервис-сервис. Укажите подсети вашего кластера и сервисов."
-    v4_cidr_blocks    = concat(yandex_vpc_subnet.public-a.v4_cidr_blocks, yandex_vpc_subnet.public-b.v4_cidr_blocks, yandex_vpc_subnet.public-c.v4_cidr_blocks)
-    from_port         = 0
-    to_port           = 65535
+    protocol       = "ANY"
+    description    = "Правило разрешает взаимодействие под-под и сервис-сервис. Укажите подсети вашего кластера и сервисов."
+    v4_cidr_blocks = concat(yandex_vpc_subnet.public-a.v4_cidr_blocks, yandex_vpc_subnet.public-b.v4_cidr_blocks, yandex_vpc_subnet.public-c.v4_cidr_blocks)
+    from_port      = 0
+    to_port        = 65535
   }
   ingress {
-    protocol          = "ICMP"
-    description       = "Правило разрешает отладочные ICMP-пакеты из внутренних подсетей."
-    v4_cidr_blocks    = ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
+    protocol       = "ICMP"
+    description    = "Правило разрешает отладочные ICMP-пакеты из внутренних подсетей."
+    v4_cidr_blocks = ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
   }
   ingress {
-    protocol          = "TCP"
-    description       = "Правило разрешает входящий трафик из интернета на диапазон портов NodePort. Добавьте или измените порты на нужные вам."
-    v4_cidr_blocks    = ["0.0.0.0/0"]
-    from_port         = 30000
-    to_port           = 32767
+    protocol       = "TCP"
+    description    = "Правило разрешает входящий трафик из интернета на диапазон портов NodePort. Добавьте или измените порты на нужные вам."
+    v4_cidr_blocks = ["0.0.0.0/0"]
+    from_port      = 30000
+    to_port        = 32767
   }
   egress {
-    protocol          = "ANY"
-    description       = "Правило разрешает весь исходящий трафик. Узлы могут связаться с Yandex Container Registry, Yandex Object Storage, Docker Hub и т. д."
-    v4_cidr_blocks    = ["0.0.0.0/0"]
-    from_port         = 0
-    to_port           = 65535
+    protocol       = "ANY"
+    description    = "Правило разрешает весь исходящий трафик. Узлы могут связаться с Yandex Container Registry, Yandex Object Storage, Docker Hub и т. д."
+    v4_cidr_blocks = ["0.0.0.0/0"]
+    from_port      = 0
+    to_port        = 65535
   }
 }
 
@@ -155,7 +190,7 @@ resource "yandex_kms_symmetric_key" "kms-key" {
 resource "yandex_kms_symmetric_key_iam_binding" "viewer" {
   symmetric_key_id = yandex_kms_symmetric_key.kms-key.id
   role             = "viewer"
-  members = [
+  members          = [
     "serviceAccount:${yandex_iam_service_account.kuber-sa-account.id}"
   ]
 }
