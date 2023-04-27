@@ -17,3 +17,11 @@ variable "kuber-sa-name" {
 variable "k8s_version" {
   default = "1.23"
 }
+
+variable "database_user" {
+  default = ""
+}
+
+variable "database_password" {
+  default = ""
+}

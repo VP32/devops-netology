@@ -10,5 +10,4 @@ image:
   tag: "5.2.1-apache"
 
 database:
-# TODO получить из терраформа... Но как?
-  serverUrl: "c-c9q65rugec3e3u9a6pb1.rw.mdb.yandexcloud.net"
+  serverUrl: "c-c9qj8t52ls855e6ua0gb.rw.mdb.yandexcloud.net"

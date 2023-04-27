@@ -39,7 +39,7 @@ resource "yandex_mdb_mysql_cluster" "vp-mysql-01" {
   network_id          = yandex_vpc_network.network-netology.id
   version             = "8.0"
   # TODO  remove it
-  security_group_ids  = [ yandex_vpc_security_group.cluster-sg-1.id ]
+  security_group_ids  = [yandex_vpc_security_group.cluster-sg-1.id]
   deletion_protection = true
 
   resources {
@@ -53,30 +53,30 @@ resource "yandex_mdb_mysql_cluster" "vp-mysql-01" {
   }
 
   backup_window_start {
-    hours = "23"
+    hours   = "23"
     minutes = "59"
   }
 
   host {
-    name = "node-a"
+    name      = "node-a"
     zone      = "ru-central1-a"
     subnet_id = yandex_vpc_subnet.private-a.id
     # TODO remove it
-    assign_public_ip = true
+    #assign_public_ip = true
   }
   host {
-    name = "node-b"
+    name      = "node-b"
     zone      = "ru-central1-b"
     subnet_id = yandex_vpc_subnet.private-b.id
     # TODO remove it
-    assign_public_ip = true
+    #assign_public_ip = true
   }
   host {
-    name = "node-c"
+    name      = "node-c"
     zone      = "ru-central1-c"
     subnet_id = yandex_vpc_subnet.private-c.id
     # TODO remove it
-    assign_public_ip = true
+    #assign_public_ip = true
   }
 }
 
@@ -87,8 +87,8 @@ resource "yandex_mdb_mysql_database" "netology" {
 
 resource "yandex_mdb_mysql_user" "connecter" {
   cluster_id = yandex_mdb_mysql_cluster.vp-mysql-01.id
-  name       = "connecter"
-  password   = "!QAZ1qaz" # TODO hide in envs
+  name       = var.database_user
+  password   = var.database_password
   permission {
     database_name = yandex_mdb_mysql_database.netology.name
     roles         = ["ALL"]
@@ -108,13 +108,13 @@ resource "yandex_vpc_security_group" "cluster-sg-1" {
     port           = 3306
   }
 
-#  egress {
-#    protocol       = "TCP"
-#    description    = "Исходящий траффик кластера"
-#    v4_cidr_blocks = ["192.168.10.0/24", "192.168.20.0/24", "192.168.30.0/24"]
-#    from_port      = 3306
-#    to_port        = 3306
-#  }
+  #  egress {
+  #    protocol       = "TCP"
+  #    description    = "Исходящий траффик кластера"
+  #    v4_cidr_blocks = ["192.168.10.0/24", "192.168.20.0/24", "192.168.30.0/24"]
+  #    from_port      = 3306
+  #    to_port        = 3306
+  #  }
 }
 
 
@@ -127,6 +127,17 @@ output "connection_nodes" {
   # TODO
   value = yandex_mdb_mysql_cluster.vp-mysql-01.host.*.fqdn
 }
-output "database_data" {
-  value = yandex_mdb_mysql_database.netology.id
+
+
+resource "local_file" "output_master_address" {
+  content = <<-DOC
+    database:
+      serverUrl: "c-${yandex_mdb_mysql_cluster.vp-mysql-01.id}.rw.mdb.yandexcloud.net"
+    DOC
+
+  filename   = "../k8s/helm/pma/db.yaml"
+  depends_on = [
+    yandex_mdb_mysql_cluster.vp-mysql-01
+  ]
 }
+
