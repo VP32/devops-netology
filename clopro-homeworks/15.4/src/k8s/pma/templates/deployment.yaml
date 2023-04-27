@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pma-deployment
+  labels:
+    app: pma
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: pma
+  template:
+    metadata:
+      labels:
+        app: pma
+    spec:
+      containers:
+        - name: pma
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 80
+          env:
+            - name: PMA_HOST
+              value: {{ .Values.database.serverUrl }}
