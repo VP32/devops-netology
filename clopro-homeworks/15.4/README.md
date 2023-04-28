@@ -168,7 +168,7 @@ resource "local_file" "output_master_address" {
 
 ![1.png](img%2F1.png)
 
-![2.png](img%2F2.png)
+![2.png](img%2F2-.png)
 
 На выходе по кластеру MySQL выводятся:
  - адрес мастера в кластере БД
@@ -368,7 +368,7 @@ output "k8s_cluster_id" {
 
 Кластер уже создался при запуске Терраформа в задании 1:
 
-![2.png](img%2F2.png)
+![2.png](img%2F2-.png)
 
 По кластеру Kubernetes выводится:
  - эндпойнт подключения к кластеру
