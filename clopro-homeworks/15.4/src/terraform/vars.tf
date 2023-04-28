@@ -25,3 +25,7 @@ variable "database_user" {
 variable "database_password" {
   default = ""
 }
+
+variable "database_name" {
+  default = "netology_db"
+}
