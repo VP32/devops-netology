@@ -147,6 +147,8 @@
 Сделал 2 workspace Terraform: stage и prod.
 За счет этого далее во всей работе использую 2 независимых контура проекта: stage и prod. В контуре prod - более мощные машины.
 
+**UPD 18.06.2023** Из-за высоких расходов на поддержание обоих контуров и исчерпания двух учебных грантов удалил контур prod. Готов при необходимости развернуть его в дальнейшем на короткий период, например на сутки. 
+
 Для backend Terraform использую Terraform Cloud (приходится включать VPN).
 
 Кластер Kubernetes создавал с помощью Kubespray на созданных из Терраформа ВМ. Кластеров также создается два: stage и prod-кластеры.
@@ -206,8 +208,7 @@ Stage registry:
 
 Prod registry:
 
-- [webapp php-fpm](https://console.cloud.yandex.ru/folders/b1gbs15fbe0jet0kppoa/container-registry/registries/crp21d6nmjj9go1scrqg/overview/vp-diploma-webapp/image/crp3mm4cv97r1rrtajio/overview)
-- [webapp nginx](https://console.cloud.yandex.ru/folders/b1gbs15fbe0jet0kppoa/container-registry/registries/crp21d6nmjj9go1scrqg/overview/vp-diploma-nginx/image/crpekcihghthgnnj8boq/overview)
+**UPD 18.06.2023** Из-за высоких расходов на поддержание обоих контуров и исчерпания двух учебных грантов удалил контур prod. Готов при необходимости развернуть его в дальнейшем на короткий период, например на сутки. 
 
 
 5. Репозиторий с конфигурацией Kubernetes кластера.
@@ -249,21 +250,7 @@ Prod registry:
 
 **Prod окружение:**
 
-
-**Приложение**: http://158.160.110.56
-
-**PhpMyAdmin**: http://62.84.119.56
-
-логин: superuser
-
-пароль: JJHVDarGYZ1ZBU9y
-
-
-**Grafana**:  http://158.160.96.39:8080/
-
-логин: admin
-
-пароль: vp-diploma-prom
+**UPD 18.06.2023** Из-за высоких расходов на поддержание обоих контуров и исчерпания двух учебных грантов удалил контур prod. Готов при необходимости развернуть его в дальнейшем на короткий период, например на сутки. 
 
 CI/CD происходит внутри Gitlab.com, примеры выполненных пайплайнов доступны в репозитории тестового приложения:
 
